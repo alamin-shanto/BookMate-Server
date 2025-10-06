@@ -4,7 +4,16 @@ import Book, { IBook } from "../models/book.model";
 
 // Typed payload for create/update
 type BookPayload = Partial<
-  Pick<IBook, "title" | "author" | "genre" | "isbn" | "description" | "copies">
+  Pick<
+    IBook,
+    | "title"
+    | "author"
+    | "genre"
+    | "isbn"
+    | "description"
+    | "copies"
+    | "available"
+  >
 >;
 
 // Helper: validate MongoDB ObjectId
