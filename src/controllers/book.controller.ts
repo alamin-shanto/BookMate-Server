@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import Book, { IBook } from "../models/book.model";
+import ApiFeatures from "../utilities/apiFeatures";
 
 // Typed payload for create/update
 type BookPayload = Partial<
@@ -27,20 +28,22 @@ export const listBooks = async (
   next: NextFunction
 ) => {
   try {
-    const page = Math.max(1, Number(req.query.page) || 1);
-    const limit = Math.min(100, Number(req.query.limit) || 20);
-    const skip = (page - 1) * limit;
+    const features = new ApiFeatures(Book.find(), req.query)
+      .filter()
+      .search()
+      .sort()
+      .limitFields()
+      .paginate();
 
-    const query: any = {};
-    if (req.query.genre) query.genre = req.query.genre;
-    if (req.query.author) query.author = req.query.author;
+    const books = await features.query;
+    const total = await Book.countDocuments();
 
-    const [items, total] = await Promise.all([
-      Book.find(query).skip(skip).limit(limit).lean(),
-      Book.countDocuments(query),
-    ]);
-
-    res.json({ success: true, data: { items, total, page, limit } });
+    res.status(200).json({
+      success: true,
+      total,
+      count: books.length,
+      data: books,
+    });
   } catch (err) {
     next(err);
   }
@@ -62,7 +65,6 @@ export const createBook = async (
       });
     }
 
-    // Set availability automatically
     const book = await Book.create({
       ...payload,
       available: payload.copies ? payload.copies > 0 : true,
@@ -74,7 +76,8 @@ export const createBook = async (
   }
 };
 
-/* Get a single book */
+// Get a Single Book by ID
+
 export const getBook = async (
   req: Request,
   res: Response,
@@ -93,13 +96,14 @@ export const getBook = async (
         .status(404)
         .json({ success: false, message: "Book not found" });
 
-    res.json({ success: true, data: book });
+    res.status(200).json({ success: true, data: book });
   } catch (err) {
     next(err);
   }
 };
 
-/* Update a book */
+// Update a Book
+
 export const updateBook = async (
   req: Request,
   res: Response,
@@ -129,13 +133,15 @@ export const updateBook = async (
         .status(404)
         .json({ success: false, message: "Book not found" });
 
-    res.json({ success: true, data: book });
+    res.status(200).json({ success: true, data: book });
   } catch (err) {
     next(err);
   }
 };
 
-/* Delete a book */
+/* 
+   Delete a Book
+*/
 export const deleteBook = async (
   req: Request,
   res: Response,

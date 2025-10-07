@@ -1,29 +1,33 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
-import Book, { IBook } from "../models/book.model";
-import Borrow, { IBorrow } from "../models/borrow.model";
+import Book from "../models/book.model";
+import Borrow from "../models/borrow.model";
 
-// Typed payload for borrowing
 type BorrowPayload = {
   quantity: number;
-  dueDate: string; // or Date if you convert later
+  dueDate: string;
 };
 
-// Helper: validate MongoDB ObjectId
 const isValidId = (id: string | undefined) =>
   !!id && mongoose.Types.ObjectId.isValid(id);
 
 /* Borrow a book */
-export const borrowBook = async (req: Request, res: Response) => {
+export const borrowBook = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { bookId } = req.params;
   if (!isValidId(bookId)) {
-    return res.status(400).json({ message: "Invalid book ID" });
+    return res.status(400).json({ success: false, message: "Invalid book ID" });
   }
 
   const { quantity, dueDate }: BorrowPayload = req.body;
 
   if (!quantity || quantity <= 0) {
-    return res.status(400).json({ message: "Invalid quantity" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid quantity" });
   }
 
   const session = await mongoose.startSession();
@@ -31,32 +35,52 @@ export const borrowBook = async (req: Request, res: Response) => {
 
   try {
     const book = await Book.findById(bookId).session(session);
-    if (!book) throw new Error("Book not found");
-    if (quantity > book.copies) throw new Error("Not enough copies");
+    if (!book) {
+      throw new Error("Book not found");
+    }
+    if (quantity > book.copies) {
+      throw new Error("Not enough copies available");
+    }
 
+    // Decrease copies and set availability
     book.copies -= quantity;
     book.available = book.copies > 0;
     await book.save({ session });
 
-    const borrow = await Borrow.create(
-      [{ book: book._id, quantity, dueDate }],
+    // Record the borrow transaction
+    const borrowRecord = await Borrow.create(
+      [
+        {
+          book: book._id,
+          quantity,
+          dueDate,
+        },
+      ],
       { session }
     );
 
     await session.commitTransaction();
-    res.status(201).json(borrow[0]);
+    res.status(201).json({
+      success: true,
+      message: "Book borrowed successfully",
+      data: borrowRecord[0],
+    });
   } catch (err) {
     await session.abortTransaction();
-    res.status(400).json({ message: (err as Error).message });
+    next(err);
   } finally {
     session.endSession();
   }
 };
 
 /* Aggregation for borrow summary */
-export const borrowSummary = async (_req: Request, res: Response) => {
+export const borrowSummary = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const agg = await Borrow.aggregate([
+    const summary = await Borrow.aggregate([
       {
         $group: {
           _id: "$book",
@@ -74,14 +98,20 @@ export const borrowSummary = async (_req: Request, res: Response) => {
       { $unwind: "$book" },
       {
         $project: {
+          _id: 0,
+          bookId: "$book._id",
           title: "$book.title",
           isbn: "$book.isbn",
           totalQuantity: 1,
         },
       },
     ]);
-    res.json(agg);
+
+    res.json({
+      success: true,
+      data: summary,
+    });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err });
+    next(err);
   }
 };
