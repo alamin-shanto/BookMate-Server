@@ -114,6 +114,7 @@ All routes use a centralized error handler that:
 
 - Logs detailed errors in the console for debugging
 - Returns clean, user-friendly messages in JSON responses
+  
 Example error response:
 ```
 {
