@@ -31,22 +31,28 @@ This backend is cleanly structured, developer-friendly, and ready for production
 ## 📂 Project Structure
 
 ```
-┣ 📂controllers
-┃ ┣ 📜book.controller.ts
-┃ ┗ 📜borrow.controller.ts
-┣ 📂middlewares
-┃ ┣ 📜errorHandler.ts
-┃ ┗ 📜validateRequest.ts
-┣ 📂models
-┃ ┣ 📜book.model.ts
-┃ ┗ 📜borrow.model.ts
-┣ 📂routes
-┃ ┣ 📜book.routes.ts
-┃ ┗ 📜borrow.routes.ts
-┣ 📂utilities
-┃ ┗ 📜apiFeatures.ts
-┣ 📜app.ts
-┗ 📜index.ts
+┣ 📂src
+┃ ┣ 📂controllers
+┃ ┃ ┣ 📜book.controller.ts
+┃ ┃ ┗ 📜borrow.controller.ts
+┃ ┣ 📂middlewares
+┃ ┃ ┣ 📜errorHandler.ts
+┃ ┃ ┗ 📜validateRequest.ts
+┃ ┣ 📂models
+┃ ┃ ┣ 📜book.model.ts
+┃ ┃ ┗ 📜borrow.model.ts
+┃ ┣ 📂routes
+┃ ┃ ┣ 📜book.routes.ts
+┃ ┃ ┗ 📜borrow.routes.ts
+┃ ┣ 📂utilities
+┃ ┃ ┗ 📜apiFeatures.ts
+┃ ┣ 📜app.ts
+┃ ┗ 📜index.ts
+┣ 📜.env
+┣ 📜.gitignore
+┣ 📜package.json
+┗ 📜tsconfig.json
+
 ```
 
 
