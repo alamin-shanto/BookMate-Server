@@ -39,10 +39,8 @@ export const listBooks = async (
     const total = await Book.countDocuments();
 
     res.status(200).json({
-      success: true,
+      items: books,
       total,
-      count: books.length,
-      data: books,
     });
   } catch (err) {
     next(err);
