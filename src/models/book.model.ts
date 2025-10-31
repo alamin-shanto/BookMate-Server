@@ -8,6 +8,7 @@ export interface IBook extends Document {
   description?: string;
   copies: number;
   available: boolean;
+  image?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +22,7 @@ const BookSchema = new Schema<IBook>(
     description: String,
     copies: { type: Number, default: 1, min: 0 },
     available: { type: Boolean, default: true },
+    image: { type: String },
   },
   { timestamps: true }
 );
