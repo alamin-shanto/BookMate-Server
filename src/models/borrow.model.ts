@@ -4,6 +4,7 @@ import { IBook } from "./book.model";
 export interface IBorrow extends Document {
   book: Types.ObjectId | IBook;
   borrowerName: string;
+  quantity: number;
   borrowedAt: Date;
   dueDate: Date;
   returnedAt?: Date;
@@ -16,6 +17,7 @@ const BorrowSchema = new Schema<IBorrow>(
   {
     book: { type: Schema.Types.ObjectId, ref: "Book", required: true },
     borrowerName: { type: String, required: true },
+    quantity: { type: Number, required: true, min: 1, default: 1 },
     borrowedAt: { type: Date, default: Date.now },
     dueDate: { type: Date, required: true },
     returnedAt: { type: Date },

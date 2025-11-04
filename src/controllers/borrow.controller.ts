@@ -49,6 +49,7 @@ export const borrowBook = async (
         {
           book: book._id,
           borrowerName,
+          quantity,
           borrowedAt: new Date(),
           dueDate: new Date(dueDate),
           returned: false,

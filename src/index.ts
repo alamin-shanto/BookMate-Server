@@ -12,6 +12,9 @@ const startServer = async () => {
     await mongoose.connect(MONGO_URI);
     console.log("✅ Connected to MongoDB");
 
+    const db = mongoose.connection;
+    console.log("Using DB:", db.name);
+
     app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
