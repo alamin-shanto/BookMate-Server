@@ -5,7 +5,7 @@ export interface IBorrow extends Document {
   book: Types.ObjectId | IBook;
   borrowerName: string;
   borrowedAt: Date;
-  dueAt: Date;
+  dueDate: Date;
   returnedAt?: Date;
   returned: boolean;
   createdAt: Date;
@@ -17,7 +17,7 @@ const BorrowSchema = new Schema<IBorrow>(
     book: { type: Schema.Types.ObjectId, ref: "Book", required: true },
     borrowerName: { type: String, required: true },
     borrowedAt: { type: Date, default: Date.now },
-    dueAt: { type: Date, required: true },
+    dueDate: { type: Date, required: true },
     returnedAt: { type: Date },
     returned: { type: Boolean, default: false },
   },

@@ -5,13 +5,13 @@ import Borrow from "../models/borrow.model";
 
 type BorrowPayload = {
   quantity: number;
-  dueDate: string;
+  dueAt: string;
+  borrowerName: string;
 };
 
 const isValidId = (id: string | undefined) =>
   !!id && mongoose.Types.ObjectId.isValid(id);
 
-/* Borrow a book */
 export const borrowBook = async (
   req: Request,
   res: Response,
@@ -22,38 +22,35 @@ export const borrowBook = async (
     return res.status(400).json({ success: false, message: "Invalid book ID" });
   }
 
-  const { quantity, dueDate }: BorrowPayload = req.body;
+  const { quantity, dueAt, borrowerName }: BorrowPayload = req.body;
 
-  if (!quantity || quantity <= 0) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Invalid quantity" });
-  }
+  if (!quantity || quantity <= 0)
+    return res.status(400).json({ message: "Invalid quantity" });
+  if (!dueAt) return res.status(400).json({ message: "Due date is required" });
+  if (!borrowerName)
+    return res.status(400).json({ message: "Borrower name required" });
 
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
     const book = await Book.findById(bookId).session(session);
-    if (!book) {
-      throw new Error("Book not found");
-    }
-    if (quantity > book.copies) {
-      throw new Error("Not enough copies available");
-    }
+    if (!book) throw new Error("Book not found");
+    if (quantity > book.copies) throw new Error("Not enough copies available");
 
-    // Decrease copies and set availability
+    // Decrement copies
     book.copies -= quantity;
     book.available = book.copies > 0;
     await book.save({ session });
 
-    // Record the borrow transaction
     const borrowRecord = await Borrow.create(
       [
         {
           book: book._id,
-          quantity,
-          dueDate,
+          borrowerName,
+          borrowedAt: new Date(),
+          dueAt: new Date(dueAt),
+          returned: false,
         },
       ],
       { session }
