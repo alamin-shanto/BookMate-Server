@@ -5,7 +5,7 @@ import Borrow from "../models/borrow.model";
 
 type BorrowPayload = {
   quantity: number;
-  dueAt: string;
+  dueDate: string;
   borrowerName: string;
 };
 
@@ -22,11 +22,12 @@ export const borrowBook = async (
     return res.status(400).json({ success: false, message: "Invalid book ID" });
   }
 
-  const { quantity, dueAt, borrowerName }: BorrowPayload = req.body;
+  const { quantity, dueDate, borrowerName }: BorrowPayload = req.body;
 
   if (!quantity || quantity <= 0)
     return res.status(400).json({ message: "Invalid quantity" });
-  if (!dueAt) return res.status(400).json({ message: "Due date is required" });
+  if (!dueDate)
+    return res.status(400).json({ message: "Due date is required" });
   if (!borrowerName)
     return res.status(400).json({ message: "Borrower name required" });
 
@@ -49,7 +50,7 @@ export const borrowBook = async (
           book: book._id,
           borrowerName,
           borrowedAt: new Date(),
-          dueAt: new Date(dueAt),
+          dueDate: new Date(dueDate),
           returned: false,
         },
       ],
