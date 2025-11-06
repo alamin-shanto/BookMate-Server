@@ -20,7 +20,7 @@ const BookSchema = new Schema<IBook>(
     genre: String,
     isbn: { type: String, index: true },
     description: String,
-    copies: { type: Number, default: 1, min: 0 },
+    copies: { type: Number, required: true, default: 1 },
     available: { type: Boolean, default: true },
     image: { type: String },
   },
