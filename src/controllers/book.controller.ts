@@ -95,6 +95,7 @@ export const getBook = async (
         .json({ success: false, message: "Book not found" });
 
     res.status(200).json({ success: true, data: book });
+    console.log("Book API response:", { success: true, data: book });
   } catch (err) {
     next(err);
   }
